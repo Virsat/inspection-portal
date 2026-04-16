@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 Int                   @id @default(autoincrement())
+  email              String                @unique
+  password           String
+  role               Role                  @default(INSPECTOR)
+  designation        String?
+  name               String?
+  permitExpiry       DateTime?
+  qrCode             String?
+  unit               String?
+  isActive           Boolean               @default(true)
+  canReportIncidents Boolean               @default(true)
+  mustChangePassword Boolean               @default(false)
+  incidents          Incident[]
+  inspections        Inspection[]
+  permissions        InspectorPermission[]
+  comments           IncidentComment[]
+}
+
+model Incident {
+  id          Int               @id @default(autoincrement())
+  externalId  String?           @unique
+  title       String
+  description String
+  type        String
+  status      IncidentStatus    @default(OPEN)
+  location    String?
+  severity    Json?
+  analysis    Json?
+  inspectorId Int
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  imageUrls   String[]
+  inspector   User              @relation(fields: [inspectorId], references: [id])
+  comments    IncidentComment[]
+}
+
+model IncidentComment {
+  id         Int      @id @default(autoincrement())
+  content    String
+  incidentId Int
+  userId     Int
+  createdAt  DateTime @default(now())
+  
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model InspectionType {
+  id          Int                   @id @default(autoincrement())
+  name        String                @unique
+  description String?
+  inspections Inspection[]
+  permissions InspectorPermission[]
+  sections    Section[]
+}
+
+model Section {
+  id               Int            @id @default(autoincrement())
+  name             String
+  inspectionTypeId Int
+  questions        Question[]
+  inspectionType   InspectionType @relation(fields: [inspectionTypeId], references: [id])
+}
+
+model Question {
+  id         Int      @id @default(autoincrement())
+  text       String
+  sectionId  Int
+  isRequired Boolean  @default(true)
+  answers    Answer[]
+  section    Section  @relation(fields: [sectionId], references: [id])
+}
+
+model Inspection {
+  id               Int              @id @default(autoincrement())
+  inspectorId      Int
+  inspectionTypeId Int
+  status           InspectionStatus @default(IN_PROGRESS)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  answers          Answer[]
+  inspectionType   InspectionType   @relation(fields: [inspectionTypeId], references: [id])
+  inspector        User             @relation(fields: [inspectorId], references: [id])
+}
+
+model Answer {
+  id           Int        @id @default(autoincrement())
+  inspectionId Int
+  questionId   Int
+  answer       String
+  timestamp    DateTime   @default(now())
+  imageUrl     String?
+  inspection   Inspection @relation(fields: [inspectionId], references: [id])
+  question     Question   @relation(fields: [questionId], references: [id])
+}
+
+model InspectorPermission {
+  id               Int            @id @default(autoincrement())
+  inspectorId      Int
+  inspectionTypeId Int
+  inspectionType   InspectionType @relation(fields: [inspectionTypeId], references: [id])
+  inspector        User           @relation(fields: [inspectorId], references: [id])
+
+  @@unique([inspectorId, inspectionTypeId])
+}
+
+enum Role {
+  MANAGER
+  INSPECTOR
+}
+
+enum IncidentStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum InspectionStatus {
+  IN_PROGRESS
+  COMPLETED
+}
