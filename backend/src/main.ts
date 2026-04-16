@@ -12,7 +12,7 @@ async function bootstrap() {
   // Restrict CORS in production
   app.enableCors({
     origin: process.env.NODE_ENV === 'production' 
-      ? [/^https:\/\/.*\.your-app\.com$/] // Replace with real production domain
+      ? ['https://inspection.virsat.com'] 
       : '*', 
     credentials: true,
   });
