@@ -20,15 +20,15 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     ]);
 
     const request = context.switchToHttp().getRequest();
-    const deviceId = request.headers['device_id'];
+    const deviceId = request.headers['device-id'];
 
     // Specific logic for external inspection and incident submissions
     console.log(`[JwtAuthGuard] Incoming request to: ${request.url}`);
     
     if (request.url.includes('/inspections/external') || request.url.includes('/incidents/external')) {
-      console.log(`[JwtAuthGuard] External route matched. Checking device_id: ${deviceId}`);
+      console.log(`[JwtAuthGuard] External route matched. Checking device-id: ${deviceId}`);
       if (deviceId && this.devicesService.isValidDevice(deviceId)) {
-        console.log(`[JwtAuthGuard] Device ID is valid. Allowing access.`);
+        console.log(`[JwtAuthGuard] Device-id is valid. Allowing access.`);
         return true;
       }
       console.log(`[JwtAuthGuard] Device ID invalid or missing. Rejecting.`);

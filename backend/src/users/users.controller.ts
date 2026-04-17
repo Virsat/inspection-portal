@@ -78,12 +78,12 @@ export class UsersController {
   @Public()
   @Post('verify-qr')
   async verifyByQr(
-    @Body() body: any, 
+    @Body() body: any,
     @Headers('device_id') deviceId: string,
     @Query('qrCode') queryCode?: string
   ) {
     if (!deviceId || !this.devicesService.isValidDevice(deviceId)) {
-      throw new UnauthorizedException('Valid device_id header required');
+      throw new UnauthorizedException('UnAuthorized Access Attempted');
     }
 
     // 1. Try body property
