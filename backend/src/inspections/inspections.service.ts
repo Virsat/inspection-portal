@@ -192,6 +192,9 @@ export class InspectionsService {
   }
 
   async processExternalInspection(payload: any) {
+    if (!payload || typeof payload !== 'object') {
+      throw new BadRequestException('Invalid or missing payload body');
+    }
     const { answers } = payload;
     if (!answers || answers.length === 0) {
       throw new BadRequestException('No answers provided in payload');
