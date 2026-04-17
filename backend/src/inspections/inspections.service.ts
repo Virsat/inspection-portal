@@ -200,135 +200,144 @@ export class InspectionsService {
       throw new BadRequestException('No answers provided in payload');
     }
 
-    const firstAnswer = answers[0];
-    const employeeId = firstAnswer.employee_id;
-    const rawInspectionName = firstAnswer.inspection;
+    const processed = [];
+    const failed = [];
 
-    // Clean redundant suffix (e.g. "De-Isolation & Re-Energizing Inspection" -> "De-Isolation & Re-Energizing")
-    const cleanedName = rawInspectionName.replace(/ Inspection$/i, '').trim();
-
-    // 1. Find Inspector by qrCode (employee_id)
-    const inspector = await this.prisma.user.findFirst({
-      where: { qrCode: employeeId, role: 'INSPECTOR' }
-    });
-
-    if (!inspector) {
-      throw new NotFoundException(`Inspector with employee_id ${employeeId} not found`);
-    }
-
-    // 2. Find Inspection Type (STRICT MATCH against cleaned name)
-    const inspectionType = await this.prisma.inspectionType.findUnique({
-      where: { name: cleanedName },
-      include: { sections: true }
-    });
-
-    if (!inspectionType) {
-      throw new BadRequestException(`Inspection template '${cleanedName}' not found in global dictionary`);
-    }
-
-    // 3. Permission Check (MANDATORY)
-    const permission = await this.prisma.inspectorPermission.findUnique({
-      where: {
-        inspectorId_inspectionTypeId: {
-          inspectorId: inspector.id,
-          inspectionTypeId: inspectionType.id
-        }
-      }
-    });
-
-    if (!permission) {
-      throw new ForbiddenException(`Inspector ${employeeId} does not have authorized permission for ${rawInspectionName}`);
-    }
-
-    // 4. Section Integrity Check (Verify all sections in payload exist for this type)
-    const validSectionNames = new Set(inspectionType.sections.map(s => s.name));
+    // 1. Group answers by cleaned inspection name
+    const groups = new Map<string, any[]>();
     for (const ans of answers) {
-      if (!validSectionNames.has(ans.section)) {
-        throw new BadRequestException(`Section '${ans.section}' is not authorized for template '${rawInspectionName}'`);
+      const rawName = ans.inspection || 'Unknown';
+      const cleaned = rawName.replace(/ Inspection$/i, '').trim();
+      if (!groups.has(cleaned)) groups.set(cleaned, []);
+      groups.get(cleaned).push(ans);
+    }
+
+    // 2. Process each group independently for "Partial Success"
+    for (const [templateName, groupAnswers] of groups.entries()) {
+      try {
+        const firstAns = groupAnswers[0];
+        const employeeId = firstAns.employee_id;
+        const rawInspectionName = firstAns.inspection;
+
+        // FIND INSPECTOR
+        const inspector = await this.prisma.user.findFirst({
+          where: { qrCode: employeeId, role: 'INSPECTOR' }
+        });
+        if (!inspector) throw new Error(`Inspector with employee_id ${employeeId} not found`);
+
+        // FIND TYPE
+        const inspectionType = await this.prisma.inspectionType.findUnique({
+          where: { name: templateName },
+          include: { sections: true }
+        });
+        if (!inspectionType) throw new Error(`Template '${templateName}' not found in dictionary`);
+
+        // PERMISSION
+        const permission = await this.prisma.inspectorPermission.findUnique({
+          where: {
+            inspectorId_inspectionTypeId: {
+              inspectorId: inspector.id,
+              inspectionTypeId: inspectionType.id
+            }
+          }
+        });
+        if (!permission) throw new Error(`Inspector ${employeeId} not authorized for ${rawInspectionName}`);
+
+        // SECTION CHECK
+        const validSectionNames = new Set(inspectionType.sections.map(s => s.name));
+        for (const ans of groupAnswers) {
+          if (!validSectionNames.has(ans.section)) {
+            throw new Error(`Section '${ans.section}' not authorized for template '${templateName}'`);
+          }
+        }
+
+        // ATOMIC DB SYNC PER GROUP
+        const result = await this.prisma.$transaction(async (tx) => {
+          let inspection = await tx.inspection.findFirst({
+            where: {
+              inspectorId: inspector.id,
+              inspectionTypeId: inspectionType.id,
+              status: 'IN_PROGRESS'
+            }
+          });
+
+          if (!inspection) {
+            inspection = await tx.inspection.create({
+              data: {
+                inspectorId: inspector.id,
+                inspectionTypeId: inspectionType.id,
+                status: 'IN_PROGRESS',
+                createdAt: new Date(firstAns.timestamp)
+              }
+            });
+          }
+
+          for (const ans of groupAnswers) {
+            const section = await tx.section.findFirstOrThrow({
+              where: { name: ans.section, inspectionTypeId: inspectionType.id }
+            });
+
+            let question = await tx.question.findFirst({
+              where: { text: ans.question, sectionId: section.id }
+            });
+
+            if (!question) {
+              question = await tx.question.create({
+                data: { text: ans.question, sectionId: section.id, isRequired: true }
+              });
+            }
+
+            await tx.answer.create({
+              data: {
+                inspectionId: inspection.id,
+                questionId: question.id,
+                answer: ans.answer,
+                timestamp: new Date(ans.timestamp),
+                imageUrl: (ans.image_url && !['no image', 'not applicable', 'n/a', 'none'].includes(ans.image_url.toLowerCase().trim())) ? ans.image_url : null
+              }
+            });
+          }
+
+          // COMPLETION CHECK
+          const currentAnswers = await tx.answer.findMany({
+            where: { inspectionId: inspection.id },
+            include: { question: { select: { sectionId: true } } }
+          });
+
+          const answeredSectionIds = new Set(currentAnswers.map(a => a.question.sectionId));
+          const isAllSectionsComplete = inspectionType.sections.every(s => answeredSectionIds.has(s.id));
+
+          if (isAllSectionsComplete) {
+            await tx.inspection.update({
+              where: { id: inspection.id },
+              data: { status: 'COMPLETED' }
+            });
+          }
+
+          return {
+            template: templateName,
+            status: isAllSectionsComplete ? 'COMPLETED' : 'IN_PROGRESS',
+            inspectionId: inspection.id,
+            sectionsCompleted: answeredSectionIds.size,
+            totalSections: inspectionType.sections.length
+          };
+        });
+
+        processed.push(result);
+      } catch (err: any) {
+        failed.push({
+          template: templateName,
+          reason: err.message
+        });
       }
     }
 
-    // 5. Start Transaction for atomic sync
-    return this.prisma.$transaction(async (tx) => {
-      // Find existing IN_PROGRESS inspection or create new one
-      let inspection = await tx.inspection.findFirst({
-        where: {
-          inspectorId: inspector.id,
-          inspectionTypeId: inspectionType.id,
-          status: 'IN_PROGRESS'
-        }
-      });
-
-      if (!inspection) {
-        inspection = await tx.inspection.create({
-          data: {
-            inspectorId: inspector.id,
-            inspectionTypeId: inspectionType.id,
-            status: 'IN_PROGRESS',
-            createdAt: new Date(firstAnswer.timestamp)
-          }
-        });
-      }
-
-      for (const ans of answers) {
-        // Find Section (already validated above)
-        const section = await tx.section.findFirstOrThrow({
-          where: { name: ans.section, inspectionTypeId: inspectionType.id }
-        });
-
-        // Find or create Question (Dynamic questions allowed within authorized sections)
-        let question = await tx.question.findFirst({
-          where: { text: ans.question, sectionId: section.id }
-        });
-
-        if (!question) {
-          question = await tx.question.create({
-            data: { text: ans.question, sectionId: section.id, isRequired: true }
-          });
-        }
-
-        // Create the Answer
-        await tx.answer.create({
-          data: {
-            inspectionId: inspection.id,
-            questionId: question.id,
-            answer: ans.answer,
-            timestamp: new Date(ans.timestamp),
-            // imageUrl: (ans.image_url && ans.image_url !== 'No Image') ? ans.image_url : null
-            imageUrl: (ans.image_url && !['no image', 'not applicable', 'n/a', 'none'].includes(ans.image_url.toLowerCase().trim())) ? ans.image_url : null
-          }
-        });
-      }
-
-      // 6. Completion Check
-      const currentAnswers = await tx.answer.findMany({
-        where: { inspectionId: inspection.id },
-        include: { question: { select: { sectionId: true } } }
-      });
-
-      const answeredSectionIds = new Set(currentAnswers.map(a => a.question.sectionId));
-      const requiredSectionIds = new Set(inspectionType.sections.map(s => s.id));
-
-      const isAllSectionsComplete = inspectionType.sections.every(s => answeredSectionIds.has(s.id));
-
-      if (isAllSectionsComplete) {
-        await tx.inspection.update({
-          where: { id: inspection.id },
-          data: { status: 'COMPLETED' }
-        });
-      }
-
-      return {
-        success: true,
-        inspectionId: inspection.id,
-        status: isAllSectionsComplete ? 'COMPLETED' : 'IN_PROGRESS',
-        sectionsCompleted: answeredSectionIds.size,
-        totalSections: inspectionType.sections.length,
-        message: isAllSectionsComplete
-          ? 'Inspection finalized and completed'
-          : `Partial data sync successful (${answeredSectionIds.size}/${inspectionType.sections.length} sections complete)`
-      };
-    });
+    return {
+      success: processed.length > 0,
+      processed,
+      failed,
+      summary: `${processed.length} templates saved, ${failed.length} failed`
+    };
   }
 
   async getDashboardAnalytics() {
