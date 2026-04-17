@@ -176,7 +176,8 @@ export class InspectionsService {
             id: section.id,
             name: section.name,
             questions: section.questions
-              .filter(question => question.answers.length > 0) // Only show questions that were actually answered in this session
+              .filter(question => question.answers.length > 0)
+              .sort((a, b) => a.id - b.id)
               .map((question) => ({
                 id: question.id,
                 text: question.text,

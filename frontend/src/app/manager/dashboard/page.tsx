@@ -87,7 +87,7 @@ export default function ManagerDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Chart 1: Monthly Trends */}
-        {/* 
+
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
           <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-8">Inspection Velocity (6 Months)</h3>
           <div className="h-[300px]">
@@ -113,11 +113,11 @@ export default function ManagerDashboard() {
               </ResponsiveContainer>
             )}
           </div>
-        </div> */}
+        </div>
 
 
 
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
+        {/* <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
           <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-8">
             Inspection Frequency
           </h3>
@@ -162,7 +162,7 @@ export default function ManagerDashboard() {
               </ResponsiveContainer>
             )}
           </div>
-        </div>
+        </div> */}
 
         {/* Chart 2: Per Inspector */}
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
