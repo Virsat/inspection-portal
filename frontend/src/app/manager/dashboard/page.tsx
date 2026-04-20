@@ -117,52 +117,7 @@ export default function ManagerDashboard() {
 
 
 
-        {/* <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
-          <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-8">
-            Inspection Frequency
-          </h3>
 
-          <div className="h-[300px]">
-            {isLoading || !analytics ? (
-              <div className="h-full flex items-center justify-center text-slate-300">
-                Calculating trends...
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={analytics.monthlyTrends}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-
-                  <XAxis
-                    dataKey="type"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 10 }}
-                  />
-
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 10 }}
-                  />
-
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: '1rem',
-                      border: 'none',
-                      boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'
-                    }}
-                  />
-
-                  <Bar
-                    dataKey="count"
-                    fill="#10b981"
-                    radius={[6, 6, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div> */}
 
         {/* Chart 2: Per Inspector */}
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
