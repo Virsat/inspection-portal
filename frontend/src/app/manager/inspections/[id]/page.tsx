@@ -259,7 +259,7 @@ export default function InspectionDetails() {
                     <Calendar className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-tighter">Transmission Date</p>
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-tighter">Starting Date</p>
                     <p className="text-sm font-black text-slate-900">{new Date(data.createdAt).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}</p>
                     <p className="text-[11px] font-bold text-slate-400">{new Date(data.createdAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</p>
                   </div>
