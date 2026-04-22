@@ -176,10 +176,15 @@ export default function InspectionDetails() {
                               )}>
                                 {isNA ? <AlertCircle className="w-5 h-5" /> : isSkip ? <CheckCircle className="w-5 h-5" /> : <ClipboardCheck className="w-5 h-5" />}
                               </div>
-                              <p className={clsx(
-                                "text-sm font-bold leading-relaxed pt-2",
-                                isFailing ? "text-rose-900" : isSkip ? "text-emerald-900" : "text-slate-700"
-                              )}>{q.answer.answer}</p>
+                              <div className="space-y-1 pt-2">
+                                <p className={clsx(
+                                  "text-sm font-bold leading-relaxed",
+                                  isFailing ? "text-rose-900" : isSkip ? "text-emerald-900" : "text-slate-700"
+                                )}>{q.answer.answer}</p>
+                                <p className="text-[10px] font-medium text-slate-400 italic">
+                                  Recorded on {new Date(q.answer.timestamp).toLocaleDateString()} at {new Date(q.answer.timestamp).toLocaleTimeString()}
+                                </p>
+                              </div>
                             </div>
 
                             {q.answer.imageUrl && !['no image', 'not applicable', 'n/a', 'none'].includes(q.answer.imageUrl.toLowerCase().trim()) && (

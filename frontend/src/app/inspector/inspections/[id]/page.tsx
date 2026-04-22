@@ -124,10 +124,15 @@ export default function InspectorInspectionDetails() {
                         "p-6 rounded-2xl border shadow-inner",
                         q.answer.answer?.toLowerCase().includes('skip') ? "bg-emerald-50/20 border-emerald-100" : "bg-slate-50/50 border-slate-100"
                       )}>
-                        <p className={clsx(
-                          "text-sm font-medium leading-relaxed whitespace-pre-wrap",
-                          q.answer.answer?.toLowerCase().includes('skip') ? "text-emerald-900" : "text-slate-700"
-                        )}>{q.answer.answer}</p>
+                        <div className="space-y-1">
+                          <p className={clsx(
+                            "text-sm font-medium leading-relaxed whitespace-pre-wrap",
+                            q.answer.answer?.toLowerCase().includes('skip') ? "text-emerald-900" : "text-slate-700"
+                          )}>{q.answer.answer}</p>
+                          <p className="text-[10px] font-bold text-slate-400 italic">
+                            Recorded on {new Date(q.answer.timestamp).toLocaleDateString()} at {new Date(q.answer.timestamp).toLocaleTimeString()}
+                          </p>
+                        </div>
 
                         {q.answer.imageUrl && !['no image', 'not applicable', 'n/a', 'none'].includes(q.answer.imageUrl.toLowerCase().trim()) && (
                           <div className="mt-6">

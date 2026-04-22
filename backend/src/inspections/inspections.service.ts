@@ -288,15 +288,34 @@ export class InspectionsService {
               });
             }
 
-            await tx.answer.create({
-              data: {
+            // OVERRIDE LOGIC: Check if an answer for this question already exists in this inspection
+            const existingAnswer = await tx.answer.findFirst({
+              where: {
                 inspectionId: inspection.id,
-                questionId: question.id,
-                answer: ans.answer,
-                timestamp: new Date(ans.timestamp),
-                imageUrl: (ans.image_url && !['no image', 'not applicable', 'n/a', 'none'].includes(ans.image_url.toLowerCase().trim())) ? ans.image_url : null
+                questionId: question.id
               }
             });
+
+            if (existingAnswer) {
+              await tx.answer.update({
+                where: { id: existingAnswer.id },
+                data: {
+                  answer: ans.answer,
+                  timestamp: new Date(ans.timestamp),
+                  imageUrl: (ans.image_url && !['no image', 'not applicable', 'n/a', 'none'].includes(ans.image_url.toLowerCase().trim())) ? ans.image_url : null
+                }
+              });
+            } else {
+              await tx.answer.create({
+                data: {
+                  inspectionId: inspection.id,
+                  questionId: question.id,
+                  answer: ans.answer,
+                  timestamp: new Date(ans.timestamp),
+                  imageUrl: (ans.image_url && !['no image', 'not applicable', 'n/a', 'none'].includes(ans.image_url.toLowerCase().trim())) ? ans.image_url : null
+                }
+              });
+            }
           }
 
           // COMPLETION CHECK

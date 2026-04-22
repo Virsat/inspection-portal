@@ -51,7 +51,7 @@ export class SeedService {
       ],
       "Vehicle": [
         "plate", "incident", "License", "IVMS", "tyres", 
-        "Road visibility", "RAS sticker", "Footwear", "Loose objects", "journey"
+        "Road visibility", "RAS sticker", "Loose objects", "journey"
       ],
       "Working at Height": [
         "height hazard", "fall protection equipment", "fall protection harness", 
