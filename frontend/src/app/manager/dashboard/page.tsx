@@ -3,17 +3,17 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { ClipboardCheck, FileWarning, Clock, Users, ArrowRight, AlertTriangle } from 'lucide-react';
+import { ClipboardCheck, FileWarning, Clock, Users, ArrowRight, AlertTriangle, Laptop } from 'lucide-react';
 import Link from 'next/link';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, PieChart, Pie, Cell, Legend, AreaChart, Area
+  PieChart, Pie, Cell, Legend,
 } from 'recharts';
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 export default function ManagerDashboard() {
-  const [stats, setStats] = useState({ total: 0, pending: 0, completed: 0, inspectors: 0, incidents: 0 });
+  const [stats, setStats] = useState({ total: 0, pending: 0, completed: 0, inspectors: 0, incidents: 0, managers: 0, devices: 0 });
   const [analytics, setAnalytics] = useState<any>(null);
   const [recent, setRecent] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,10 +21,12 @@ export default function ManagerDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [inspRes, incRes, analyticsRes] = await Promise.all([
+        const [inspRes, incRes, analyticsRes, managersRes, devicesRes] = await Promise.all([
           api.get('/inspections'),
           api.get('/incidents/stats'),
-          api.get('/inspections/analytics')
+          api.get('/inspections/analytics'),
+          api.get('/users/managers'),
+          api.get('/devices')
         ]);
 
         const completed = inspRes.data.filter((d: any) => d.status === 'COMPLETED').length;
@@ -33,7 +35,9 @@ export default function ManagerDashboard() {
           pending: inspRes.data.length - completed,
           completed,
           inspectors: incRes.data.inspectorsCount,
-          incidents: incRes.data.total
+          incidents: incRes.data.total,
+          managers: managersRes.data.length,
+          devices: devicesRes.data.length
         });
         setRecent(inspRes.data.slice(0, 5));
         setAnalytics(analyticsRes.data);
@@ -49,8 +53,11 @@ export default function ManagerDashboard() {
   const statCards = [
     { name: 'Total Inspections', value: stats.total, icon: ClipboardCheck, color: 'text-indigo-600', bg: 'bg-indigo-50' },
     { name: 'Completed Audits', value: stats.completed, icon: FileWarning, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { name: 'Active Inspectors', value: stats.inspectors, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { name: 'Open Incidents', value: stats.incidents, icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50' },
+    { name: 'In Progress Audits', value: stats.pending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { name: 'Total Incidents', value: stats.incidents, icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50' },
+    { name: 'Inspectors', value: stats.inspectors, icon: Users, color: 'text-gray-600', bg: 'bg-gray-50' },
+    { name: 'Managers', value: stats.managers, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { name: 'Devices', value: stats.devices, icon: Laptop, color: 'text-indigo-600', bg: 'bg-indigo-50' },
   ];
 
   return (
