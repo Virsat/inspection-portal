@@ -123,7 +123,7 @@ export default function InspectionDetails() {
                       <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">{section.name}</h2>
                       {hasFailure && (
                         <div className="flex items-center gap-1.5 text-rose-600 text-[10px] font-black uppercase mt-1 tracking-widest">
-                          <AlertTriangle className="w-3.5 h-3.5" /> Safety Deficiency Detected
+                          <AlertTriangle className="w-3.5 h-3.5" /> Noncompliance Detected
                         </div>
                       )}
                     </div>

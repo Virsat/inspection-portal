@@ -9,11 +9,12 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
+import clsx from 'clsx';
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 export default function ManagerDashboard() {
-  const [stats, setStats] = useState({ total: 0, pending: 0, completed: 0, inspectors: 0, incidents: 0, managers: 0, devices: 0 });
+  const [stats, setStats] = useState({ total: 0, pending: 0, completed: 0, inspectors: 0, incidents: 0, managers: 0, devices: 0, critical: 0 });
   const [analytics, setAnalytics] = useState<any>(null);
   const [recent, setRecent] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +38,8 @@ export default function ManagerDashboard() {
           inspectors: incRes.data.inspectorsCount,
           incidents: incRes.data.total,
           managers: managersRes.data.length,
-          devices: devicesRes.data.length
+          devices: devicesRes.data.length,
+          critical: analyticsRes.data.criticalCount || 0
         });
         setRecent(inspRes.data.slice(0, 5));
         setAnalytics(analyticsRes.data);
@@ -54,10 +56,12 @@ export default function ManagerDashboard() {
     { name: 'Total Inspections', value: stats.total, icon: ClipboardCheck, color: 'text-indigo-600', bg: 'bg-indigo-50' },
     { name: 'Completed Audits', value: stats.completed, icon: FileWarning, color: 'text-emerald-600', bg: 'bg-emerald-50' },
     { name: 'In Progress Audits', value: stats.pending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { name: 'Critical (Non-Compliance)', value: stats.critical, icon: AlertTriangle, color: 'text-white', bg: 'bg-rose-600' },
     { name: 'Total Incidents', value: stats.incidents, icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50' },
     { name: 'Inspectors', value: stats.inspectors, icon: Users, color: 'text-gray-600', bg: 'bg-gray-50' },
     { name: 'Managers', value: stats.managers, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
     { name: 'Devices', value: stats.devices, icon: Laptop, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+
   ];
 
   return (
@@ -82,7 +86,7 @@ export default function ManagerDashboard() {
             >
               <div>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-3">{stat.name}</p>
-                <p className="text-4xl font-black text-slate-900">{isLoading ? '-' : stat.value}</p>
+                <p className={clsx("text-4xl font-black", stat.name.includes('Critical') ? "text-black" : "text-slate-900")}>{isLoading ? '-' : stat.value}</p>
               </div>
               <div className={`p-4 rounded-2xl ${stat.bg}`}>
                 <Icon className={`w-8 h-8 ${stat.color}`} />
@@ -241,7 +245,12 @@ export default function ManagerDashboard() {
                   <div className="flex items-center gap-6">
                     <div className={`w-3 h-3 rounded-full shadow-lg ${inspection.status === 'COMPLETED' ? 'bg-emerald-500 shadow-emerald-100' : 'bg-amber-500 shadow-amber-100'}`} />
                     <div>
-                      <p className="font-black text-slate-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tight text-sm">{inspection.inspectionType.name}</p>
+                      <p className="font-black text-slate-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tight text-sm">
+                        {inspection.inspectionType.name}
+                        {inspection.hasFailure && (
+                          <span className="ml-2 bg-rose-100 text-rose-600 text-[8px] px-2 py-0.5 rounded-full border border-rose-200">NON-COMPLIANCE</span>
+                        )}
+                      </p>
                       <p className="text-[10px] text-slate-500 font-medium mt-1">ID #{inspection.id} • {inspection.inspector.email}</p>
                     </div>
                   </div>

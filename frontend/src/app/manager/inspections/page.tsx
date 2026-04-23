@@ -83,13 +83,13 @@ export default function ManagerInspections() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Inspections</h1>
           <p className="mt-2 text-slate-500 font-medium">Review and monitor all inspection activity.</p>
         </div>
-        
+
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={clsx(
             "flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all border",
-            showFilters || activeFilterCount > 0 
-              ? "bg-indigo-50 border-indigo-200 text-indigo-700" 
+            showFilters || activeFilterCount > 0
+              ? "bg-indigo-50 border-indigo-200 text-indigo-700"
               : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
           )}
         >
@@ -176,12 +176,12 @@ export default function ManagerInspections() {
 
               {activeFilterCount > 0 && (
                 <div className="md:col-span-3 lg:col-span-5 flex justify-end">
-                   <button 
-                     onClick={clearFilters}
-                     className="text-xs font-bold text-rose-500 hover:text-rose-700 flex items-center gap-1"
-                   >
-                     <X className="w-3 h-3" /> Clear All Filters
-                   </button>
+                  <button
+                    onClick={clearFilters}
+                    className="text-xs font-bold text-rose-500 hover:text-rose-700 flex items-center gap-1"
+                  >
+                    <X className="w-3 h-3" /> Clear All Filters
+                  </button>
                 </div>
               )}
             </div>
@@ -221,15 +221,23 @@ export default function ManagerInspections() {
                       <div className="text-xs text-slate-400 mt-0.5">{new Date(insp.createdAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={clsx(
-                        "inline-flex px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider",
-                        insp.status === 'COMPLETED' ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
-                      )}>
-                        {insp.status.replace('_', ' ')}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className={clsx(
+                          "inline-flex px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap",
+                          insp.status === 'COMPLETED' ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                        )}>
+                          {insp.status.replace('_', ' ')}
+                        </span>
+                        {insp.hasFailure && (
+                          <span className="text-[10px] font-black text-rose-600 uppercase tracking-widest py-1 flex items-center gap-1">
+                            <span className="bg-rose-600 animate-pulse" />
+                            Non-Compliance
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Link 
+                      <Link
                         href={`/manager/inspections/${insp.id}`}
                         className="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 hover:text-indigo-800"
                       >

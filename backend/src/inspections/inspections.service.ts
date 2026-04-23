@@ -110,14 +110,20 @@ export class InspectionsService {
       }
     }
 
-    return this.prisma.inspection.findMany({
+    const inspections = await this.prisma.inspection.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       include: {
         inspector: { select: { id: true, email: true } },
         inspectionType: true,
+        answers: { select: { answer: true } }
       },
     });
+
+    return inspections.map(insp => ({
+      ...insp,
+      hasFailure: insp.answers.some(a => a.answer.toLowerCase() === 'no')
+    }));
   }
 
   async getInspectionTypes() {
@@ -399,6 +405,20 @@ export class InspectionsService {
 
     const types = await this.prisma.inspectionType.findMany({ select: { id: true, name: true } });
 
+    // 4. Critical Count (any "No" answer)
+    const criticalCount = await this.prisma.inspection.count({
+      where: {
+        answers: {
+          some: {
+            answer: {
+              equals: 'no',
+              mode: 'insensitive'
+            }
+          }
+        }
+      }
+    });
+
     return {
       monthlyTrends: completions.map(c => ({
         type: types.find(t => t.id === c.inspectionTypeId)?.name || 'Unknown',
@@ -409,7 +429,8 @@ export class InspectionsService {
         inspector: inspectors.find(i => i.id === pi.inspectorId)?.name || inspectors.find(i => i.id === pi.inspectorId)?.email || 'Unknown',
         count: pi._count.id
       })),
-      unitStats: Object.entries(unitCounts).map(([unit, count]) => ({ unit, count }))
+      unitStats: Object.entries(unitCounts).map(([unit, count]) => ({ unit, count })),
+      criticalCount
     };
   }
 }
