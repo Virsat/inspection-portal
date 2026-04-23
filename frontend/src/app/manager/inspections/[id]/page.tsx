@@ -187,12 +187,12 @@ export default function InspectionDetails() {
                               </div>
                             </div>
 
-                            {q.answer.imageUrl && (
+                            {q.answer.imageUrl && !['no image', 'none', ''].includes(q.answer.imageUrl.toLowerCase().trim()) && (
                               <div className="mt-8 pt-8 border-t border-slate-100">
                                 <div className="text-[10px] font-black text-slate-400 uppercase mb-4 flex items-center gap-2 tracking-widest">
                                   <ImageIcon className="w-4 h-4" /> Image Evidence
                                 </div>
-                                {['no image', 'not applicable', 'n/a', 'none'].includes(q.answer.imageUrl?.toLowerCase().trim()) ? (
+                                {['not applicable', 'n/a'].includes(q.answer.imageUrl?.toLowerCase().trim()) ? (
                                   <div className="relative group max-w-md aspect-video rounded-[24px] border border-slate-100 bg-slate-50 flex items-center justify-center overflow-hidden shadow-inner">
                                     <div className="flex flex-col items-center gap-3">
                                       <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm border border-slate-100">

@@ -302,7 +302,7 @@ export class InspectionsService {
                 data: {
                   answer: ans.answer,
                   timestamp: new Date(ans.timestamp),
-                  imageUrl: ans.image_url || null
+                  imageUrl: (ans.image_url || ans.imagePath || "").trim() || "No Image"
                 }
               });
             } else {
@@ -312,7 +312,7 @@ export class InspectionsService {
                   questionId: question.id,
                   answer: ans.answer,
                   timestamp: new Date(ans.timestamp),
-                  imageUrl: ans.image_url || null
+                  imageUrl: (ans.image_url || ans.imagePath || "").trim() || "No Image"
                 }
               });
             }
