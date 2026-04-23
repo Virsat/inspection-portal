@@ -198,7 +198,9 @@ export default function InspectionDetails() {
                                       <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm border border-slate-100">
                                         <ImageIcon className="w-6 h-6 text-slate-300" />
                                       </div>
-                                      <p className="text-[11px] font-red text-slate-400 uppercase tracking-widest">Photo Skipped During Inspection</p>
+                                      <p className="text-[11px] font-bold text-red-500 uppercase tracking-widest">
+                                        Photo Skipped During Inspection
+                                      </p>
                                     </div>
                                     <div className="absolute top-0 right-0 p-4">
                                       <span className="px-3 py-1 bg-white/80 backdrop-blur-sm border border-slate-100 rounded-lg text-[8px] font-black text-slate-400 uppercase tracking-tighter shadow-sm">N/A</span>
