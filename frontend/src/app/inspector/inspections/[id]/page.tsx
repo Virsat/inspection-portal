@@ -145,10 +145,12 @@ export default function InspectorInspectionDetails() {
                                   <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-slate-100">
                                     <ImageIcon className="w-5 h-5 text-slate-300" />
                                   </div>
-                                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verification Not Required</p>
+                                  <p className="text-[11px] font-bold text-red-500 uppercase tracking-widest">
+                                    Photo Skipped During Inspection
+                                  </p>
                                 </div>
                                 <div className="absolute top-0 right-0 p-4">
-                                   <span className="px-2 py-0.5 bg-white/80 backdrop-blur-sm border border-slate-100 rounded-md text-[7px] font-black text-slate-400 uppercase tracking-tighter shadow-sm">N/A</span>
+                                  <span className="px-2 py-0.5 bg-white/80 backdrop-blur-sm border border-slate-100 rounded-md text-[7px] font-black text-slate-400 uppercase tracking-tighter shadow-sm">N/A</span>
                                 </div>
                               </div>
                             ) : (
