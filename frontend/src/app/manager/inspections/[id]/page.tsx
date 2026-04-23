@@ -187,28 +187,42 @@ export default function InspectionDetails() {
                               </div>
                             </div>
 
-                            {q.answer.imageUrl && !['no image', 'not applicable', 'n/a', 'none'].includes(q.answer.imageUrl.toLowerCase().trim()) && (
+                            {q.answer.imageUrl && (
                               <div className="mt-8 pt-8 border-t border-slate-100">
                                 <div className="text-[10px] font-black text-slate-400 uppercase mb-4 flex items-center gap-2 tracking-widest">
                                   <ImageIcon className="w-4 h-4" /> Image Evidence
                                 </div>
-                                <div className="relative group max-w-md aspect-video">
-                                  <img
-                                    src={q.answer.imageUrl}
-                                    alt="Field Evidence"
-                                    className="rounded-[24px] border border-slate-200 w-full h-full object-cover shadow-2xl group-hover:scale-[1.02] transition-transform duration-500"
-                                  />
-                                  <a
-                                    href={q.answer.imageUrl}
-                                    target="_blank"
-                                    className="absolute inset-0 flex items-center justify-center bg-slate-900/60 text-white rounded-[24px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px]"
-                                  >
-                                    <div className="flex items-center gap-2 bg-white/20 px-6 py-3 rounded-2xl border border-white/30 backdrop-blur-md">
-                                      <ExternalLink className="w-4 h-4" />
-                                      <span className="text-[10px] font-black uppercase tracking-widest">Expand Evidence</span>
+                                {['no image', 'not applicable', 'n/a', 'none'].includes(q.answer.imageUrl.toLowerCase().trim()) ? (
+                                  <div className="relative group max-w-md aspect-video rounded-[24px] border border-slate-100 bg-slate-50 flex items-center justify-center overflow-hidden shadow-inner">
+                                    <div className="flex flex-col items-center gap-3">
+                                      <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm border border-slate-100">
+                                        <ImageIcon className="w-6 h-6 text-slate-300" />
+                                      </div>
+                                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Verification Not Required</p>
                                     </div>
-                                  </a>
-                                </div>
+                                    <div className="absolute top-0 right-0 p-4">
+                                       <span className="px-3 py-1 bg-white/80 backdrop-blur-sm border border-slate-100 rounded-lg text-[8px] font-black text-slate-400 uppercase tracking-tighter shadow-sm">N/A</span>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="relative group max-w-md aspect-video">
+                                    <img
+                                      src={q.answer.imageUrl}
+                                      alt="Field Evidence"
+                                      className="rounded-[24px] border border-slate-200 w-full h-full object-cover shadow-2xl group-hover:scale-[1.02] transition-transform duration-500"
+                                    />
+                                    <a
+                                      href={q.answer.imageUrl}
+                                      target="_blank"
+                                      className="absolute inset-0 flex items-center justify-center bg-slate-900/60 text-white rounded-[24px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px]"
+                                    >
+                                      <div className="flex items-center gap-2 bg-white/20 px-6 py-3 rounded-2xl border border-white/30 backdrop-blur-md">
+                                        <ExternalLink className="w-4 h-4" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Expand Evidence</span>
+                                      </div>
+                                    </a>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>

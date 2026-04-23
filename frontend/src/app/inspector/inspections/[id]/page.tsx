@@ -134,25 +134,39 @@ export default function InspectorInspectionDetails() {
                           </p>
                         </div>
 
-                        {q.answer.imageUrl && !['no image', 'not applicable', 'n/a', 'none'].includes(q.answer.imageUrl.toLowerCase().trim()) && (
+                        {q.answer.imageUrl && (
                           <div className="mt-6">
                             <div className="text-[10px] font-black text-slate-400 uppercase mb-3 flex items-center gap-1.5 tracking-widest pl-1">
                               <ImageIcon className="w-4 h-4 text-amber-500" /> Evidentiary Image
                             </div>
-                            <div className="relative group max-w-md">
-                              <img
-                                src={q.answer.imageUrl}
-                                alt="Documentation"
-                                className="rounded-2xl border border-slate-200 w-full h-64 object-cover shadow-sm transition-transform duration-500 group-hover:scale-[1.01]"
-                              />
-                              <a
-                                href={q.answer.imageUrl}
-                                target="_blank"
-                                className="absolute top-4 right-4 p-3 bg-slate-900/80 backdrop-blur-md text-white rounded-xl opacity-0 group-hover:opacity-100 transition-all border border-white/20"
-                              >
-                                <ExternalLink className="w-4 h-4" />
-                              </a>
-                            </div>
+                            {['no image', 'not applicable', 'n/a', 'none'].includes(q.answer.imageUrl.toLowerCase().trim()) ? (
+                              <div className="relative group max-w-md h-64 rounded-2xl border border-slate-100 bg-slate-50 flex items-center justify-center overflow-hidden shadow-inner">
+                                <div className="flex flex-col items-center gap-3">
+                                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-slate-100">
+                                    <ImageIcon className="w-5 h-5 text-slate-300" />
+                                  </div>
+                                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verification Not Required</p>
+                                </div>
+                                <div className="absolute top-0 right-0 p-4">
+                                   <span className="px-2 py-0.5 bg-white/80 backdrop-blur-sm border border-slate-100 rounded-md text-[7px] font-black text-slate-400 uppercase tracking-tighter shadow-sm">N/A</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="relative group max-w-md">
+                                <img
+                                  src={q.answer.imageUrl}
+                                  alt="Documentation"
+                                  className="rounded-2xl border border-slate-200 w-full h-64 object-cover shadow-sm transition-transform duration-500 group-hover:scale-[1.01]"
+                                />
+                                <a
+                                  href={q.answer.imageUrl}
+                                  target="_blank"
+                                  className="absolute top-4 right-4 p-3 bg-slate-900/80 backdrop-blur-md text-white rounded-xl opacity-0 group-hover:opacity-100 transition-all border border-white/20"
+                                >
+                                  <ExternalLink className="w-4 h-4" />
+                                </a>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
