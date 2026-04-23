@@ -139,7 +139,7 @@ export default function InspectorInspectionDetails() {
                             <div className="text-[10px] font-black text-slate-400 uppercase mb-3 flex items-center gap-1.5 tracking-widest pl-1">
                               <ImageIcon className="w-4 h-4 text-amber-500" /> Evidentiary Image
                             </div>
-                            {['no image', 'not applicable', 'n/a', 'none'].includes(q.answer.imageUrl.toLowerCase().trim()) ? (
+                            {['no image', 'not applicable', 'n/a', 'none'].includes(q.answer.imageUrl?.toLowerCase().trim()) ? (
                               <div className="relative group max-w-md h-64 rounded-2xl border border-slate-100 bg-slate-50 flex items-center justify-center overflow-hidden shadow-inner">
                                 <div className="flex flex-col items-center gap-3">
                                   <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-slate-100">
