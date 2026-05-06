@@ -117,6 +117,7 @@ model InspectorPermission {
 enum Role {
   MANAGER
   INSPECTOR
+  SUPER_ADMIN
 }
 
 enum IncidentStatus {
@@ -128,4 +129,19 @@ enum IncidentStatus {
 enum InspectionStatus {
   IN_PROGRESS
   COMPLETED
+}
+
+model License {
+  id              Int       @id @default(autoincrement())
+  key             String    @unique
+  customerName    String
+  deviceName      String
+  deviceId        String    @unique
+  expirationDate  DateTime
+  lastLogin       DateTime?
+  totalLogin      Int       @default(0)
+  totalFailedLogin Int      @default(0)
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  createdBy       String
 }

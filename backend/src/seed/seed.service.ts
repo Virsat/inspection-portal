@@ -4,7 +4,7 @@ import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class SeedService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async seed() {
     await this.prisma.answer.deleteMany();
@@ -19,7 +19,7 @@ export class SeedService {
     const managersToSeed = [];
     for (let i = 1; i <= 10; i++) {
       managersToSeed.push({
-        email: `manager${i}@example.com`,
+        email: `manager${i}@virsat.com`,
         password: `M@nager${i}_Secure_2026!`,
         name: `Operations Manager ${i}`
       });
@@ -40,58 +40,73 @@ export class SeedService {
         });
       }
     }
-    
+
+    // Default super admin
+    const existingSuperAdmin = await this.prisma.user.findUnique({ where: { email: 'superadmin@virsat.com' } });
+    if (!existingSuperAdmin) {
+      let saHp = await bcrypt.hash('a@dmin1_Secure_2026$!', 10);
+      await this.prisma.user.create({
+        data: {
+          email: 'superadmin@virsat.com',
+          password: saHp,
+          role: 'SUPER_ADMIN',
+          name: 'Super Admin',
+          mustChangePassword: false
+        },
+      });
+    }
+
     // Default inspector password hash for testing (can be changed later)
-    let hashedPassword = await bcrypt.hash('password123', 10);
+    let hashedPassword = await bcrypt.hash('Inspector#123!@#', 10);
 
     const INSPECTION_TEMPLATES = {
       "Confined Space": [
-        "Energy isolation", "Hazard identified", "Gas testing", 
+        "Energy isolation", "Hazard identified", "Gas testing",
         "Ventilation", "Attendant present", "Breathing apparatus", "Rescue plan"
       ],
       "Vehicle": [
-        "plate", "incident", "License", "IVMS", "tyres", 
+        "plate", "incident", "License", "IVMS", "tyres",
         "Road visibility", "RAS sticker", "Loose objects", "journey"
       ],
       "Working at Height": [
-        "height hazard", "fall protection equipment", "fall protection harness", 
-        "approved anchors", "fall path", "Secured Tools", 
+        "height hazard", "fall protection equipment", "fall protection harness",
+        "approved anchors", "fall path", "Secured Tools",
         "Barrier and Exclusion", "Rescue planned"
       ],
       "Energy Isolation": [
-        "Isolation Plan", "Hazard Identification", "Isolation Points", 
+        "Isolation Plan", "Hazard Identification", "Isolation Points",
         "Isolation Devices", "Locks & Tags", "Zero Energy"
       ],
       "Mechanical Lifting": [
-        "Lift Plan", "Hazard Identification Lift", "Worker Qualification", 
-        "Stability Assessment", "Equipment Certification", 
+        "Lift Plan", "Hazard Identification Lift", "Worker Qualification",
+        "Stability Assessment", "Equipment Certification",
         "Communication Plan Lift", "Load Inspection", "Barriers and Exclusion Lift"
       ],
       "Hot Work": [
-        "Energy Isolation Hot", "Hazard Identification Hot", 
+        "Energy Isolation Hot", "Hazard Identification Hot",
         "Hazardous Area Hot", "Monitoring", "Ignition Source", "Flammable"
       ],
       "De-Isolation & Re-Energizing": [
-        "Energy isolation de-isolation", "Isolation devices de-isolation", 
+        "Energy isolation de-isolation", "Isolation devices de-isolation",
         "Notifying personnel", "Re-energizing"
       ],
       "Live Electrical": [
-        "Work Scope", "Circuit Verification", "PPE Rating", 
-        "Restricted Zone", "Electrical Standby", 
+        "Work Scope", "Circuit Verification", "PPE Rating",
+        "Restricted Zone", "Electrical Standby",
         "Communication Plan Electrical", "Insulated Tools", "Emergency Response Electrical"
       ],
       "Working Around Mobile Equipment": [
-        "Parking Area", "Safeguards", "Mobile Inspection", 
+        "Parking Area", "Safeguards", "Mobile Inspection",
         "Load Stability", "Impact Prevention", "Unintentional Movement"
       ],
       "Work Near Water": [
-        "Hazard Identification Water", "Exclusion Zone Water", 
+        "Hazard Identification Water", "Exclusion Zone Water",
         "PFDs", "Walking Surface", "Communication Plan Water", "Rescue Plan Water"
       ],
       "Excavation": [
-        "Energy Isolation Excavation", "Underground Utilities", 
-        "Overhead Obstruction", "Access Barriers", "Soil Stability", 
-        "Equipment stability", "Confined Space Excavation", 
+        "Energy Isolation Excavation", "Underground Utilities",
+        "Overhead Obstruction", "Access Barriers", "Soil Stability",
+        "Equipment stability", "Confined Space Excavation",
         "Rescue Plan Excavation", "Deeper than 4 Feet"
       ]
     };
@@ -118,11 +133,11 @@ export class SeedService {
       createdTypes.push(it);
     }
 
-    let existingInspector = await this.prisma.user.findUnique({ where: { email: 'inspector@example.com' } });
+    let existingInspector = await this.prisma.user.findUnique({ where: { email: 'inspector@virsat.com' } });
     if (!existingInspector) {
       existingInspector = await this.prisma.user.create({
         data: {
-          email: 'inspector@example.com',
+          email: 'inspector@virsat.com',
           password: hashedPassword,
           role: 'INSPECTOR',
           qrCode: 'Tgxs9meGG', // Match the user's sample data
@@ -139,7 +154,7 @@ export class SeedService {
       });
     }
 
-    return { 
+    return {
       message: 'Templates successfully refreshed with precise section mappings.',
       typesAdded: createdTypes.length
     };

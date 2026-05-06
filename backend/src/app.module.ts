@@ -8,6 +8,7 @@ import { InspectionsModule } from './inspections/inspections.module';
 import { IncidentsModule } from './incidents/incidents.module';
 import { SeedModule } from './seed/seed.module';
 import { DevicesModule } from './devices/devices.module';
+import { LicensesModule } from './licenses/licenses.module';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { DevicesModule } from './devices/devices.module';
       ttl: 60000,
       limit: 100,
     }]),
-    PrismaModule, AuthModule, UsersModule, InspectionsModule, IncidentsModule, SeedModule, DevicesModule
+    PrismaModule, AuthModule, UsersModule, InspectionsModule, IncidentsModule, SeedModule, DevicesModule, LicensesModule
   ],
   controllers: [],
   providers: [

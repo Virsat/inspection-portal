@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 type UserData = {
   id: number;
   email: string;
-  role: 'MANAGER' | 'INSPECTOR';
+  role: 'MANAGER' | 'INSPECTOR' | 'SUPER_ADMIN';
   mustChangePassword?: boolean;
 };
 
@@ -47,18 +47,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = (token: string, userData: UserData) => {
+    console.log('[AuthContext] Login called with:', userData);
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     
     // Check for mandatory password change first
     if (userData.mustChangePassword) {
+      console.log('[AuthContext] mustChangePassword is true, redirecting to /change-password');
       router.push('/change-password');
       return;
     }
 
     // Redirect based on role
-    if (userData.role === 'MANAGER') {
+    console.log('[AuthContext] Redirecting based on role:', userData.role);
+    if (userData.role === 'SUPER_ADMIN') {
+      router.push('/super-admin/dashboard');
+    } else if (userData.role === 'MANAGER') {
       router.push('/manager/dashboard');
     } else {
       router.push('/inspector/dashboard');

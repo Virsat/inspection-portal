@@ -50,8 +50,10 @@ export default function Login() {
   const attemptSeed = async () => {
     setSeedStatus('Seeding database...');
     try {
-      await api.post('/seed');
-      setSeedStatus('Success! You can now log in using manager@example.com / password123');
+      await api.post('/seed', {}, {
+        headers: { 'x-admin-key': 'super-secret-admin-seed-key!' }
+      });
+      setSeedStatus('Success! You can now log in using superadmin@example.com / superadmin123');
     } catch (e: any) {
       if (e.response?.status === 409) {
         setSeedStatus('Database is already seeded.');
@@ -125,8 +127,20 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="px-8 pb-8 text-center text-xs text-slate-400 font-medium">
-          Authorised Personnel Only. All access attempts are logged.
+        <div className="px-8 pb-8 space-y-4">
+          <div className="text-center">
+            <button 
+              onClick={attemptSeed}
+              className="text-indigo-600 hover:text-indigo-800 text-xs font-medium flex items-center justify-center gap-1 mx-auto"
+            >
+              <DatabaseZap className="w-3 h-3" />
+              {seedStatus || 'Initial Setup: Seed Database'}
+            </button>
+          </div>
+          
+          <div className="text-center text-xs text-slate-400 font-medium pt-2 border-t border-slate-50">
+            Authorised Personnel Only. All access attempts are logged.
+          </div>
         </div>
       </motion.div>
     </div>
